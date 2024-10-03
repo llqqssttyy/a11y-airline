@@ -2,12 +2,15 @@ import styles from './App.module.css';
 import Navigation from './components/Navigation';
 import FlightBooking from './components/FlightBooking';
 import TravelSection from './components/TravelSection';
-// import PromotionModal from './components/PromotionModal';
+import PromotionModal from './components/PromotionModal';
+import { useRef } from 'react';
 
 function App() {
+  const skipToMainRef = useRef<HTMLAnchorElement | null>(null);
+
   return (
     <div className={styles.app}>
-      <a href="#main-content" className={styles.skipToMain}>
+      <a ref={skipToMainRef} className={styles.skipToMain} href="#main-content">
         본문으로 바로가기
       </a>
 
@@ -32,8 +35,8 @@ function App() {
       <footer className={styles.footer}>
         <p className="body-text">&copy; A11Y AIRLINE</p>
       </footer>
-      {/* 추가 CHALLENGE: 모달 포커스 트랩 */}
-      {/* <PromotionModal /> */}
+
+      <PromotionModal closeCallback={() => skipToMainRef.current?.focus()} />
     </div>
   );
 }
