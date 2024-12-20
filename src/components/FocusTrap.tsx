@@ -1,25 +1,28 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 
-type FocusTrapProps = {
+interface FocusTrapProps {
   children: React.ReactNode;
   isActive: boolean;
-};
+}
 
-const FocusTrap: React.FC<FocusTrapProps> = ({ children, isActive }) => {
+export default function FocusTrap({ children, isActive }: FocusTrapProps) {
   const focusTrapRef = useRef<HTMLDivElement | null>(null);
 
-  const getFocusableElements = useCallback(() => {
-    if (!focusTrapRef.current) return [];
+  const isFocusable = (element: HTMLElement) => {
+    if (
+      (element instanceof HTMLButtonElement ||
+        element instanceof HTMLInputElement ||
+        element instanceof HTMLTextAreaElement ||
+        element instanceof HTMLSelectElement) &&
+      element.disabled
+    ) {
+      return false;
+    }
 
-    const focusableElements: HTMLElement[] = [];
-    const childrenArray = Array.from(focusTrapRef.current.children);
+    if (element.hidden) return false;
 
-    childrenArray.forEach((child) => {
-      focusableElements.push(...findFocusableElements(child));
-    });
-
-    return focusableElements;
-  }, []);
+    return element.matches('a[href], button, textarea, input, select') || element.tabIndex >= 0;
+  };
 
   const findFocusableElements = (element: Element): HTMLElement[] => {
     const focusableElements: HTMLElement[] = [];
@@ -36,12 +39,18 @@ const FocusTrap: React.FC<FocusTrapProps> = ({ children, isActive }) => {
     return focusableElements;
   };
 
-  const isFocusable = (element: HTMLElement) => {
-    return (
-      element.matches('a[href], button, textarea, input, select') ||
-      (element.tabIndex >= 0 && !element.disabled && !element.hidden)
-    );
-  };
+  const getFocusableElements = useCallback(() => {
+    if (!focusTrapRef.current) return [];
+
+    const focusableElements: HTMLElement[] = [];
+    const childrenArray = Array.from(focusTrapRef.current.children);
+
+    childrenArray.forEach((child) => {
+      focusableElements.push(...findFocusableElements(child));
+    });
+
+    return focusableElements;
+  }, []);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -78,13 +87,11 @@ const FocusTrap: React.FC<FocusTrapProps> = ({ children, isActive }) => {
   useEffect(() => {
     if (!isActive) return;
 
-    // 키보드 이벤트 리스너 등록
     const handleKeyDownListener = (event: KeyboardEvent) => handleKeyDown(event);
 
     window.addEventListener('keydown', handleKeyDownListener);
 
     return () => {
-      // 컴포넌트 언마운트 시 이벤트 리스너 제거
       window.removeEventListener('keydown', handleKeyDownListener);
     };
   }, [handleKeyDown, isActive]);
@@ -94,6 +101,4 @@ const FocusTrap: React.FC<FocusTrapProps> = ({ children, isActive }) => {
       {children}
     </div>
   );
-};
-
-export default FocusTrap;
+}
