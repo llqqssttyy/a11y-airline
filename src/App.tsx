@@ -8,6 +8,10 @@ import { useRef } from 'react';
 function App() {
   const skipToMainRef = useRef<HTMLAnchorElement | null>(null);
 
+  const moveFocusToMain = () => {
+    skipToMainRef.current?.focus();
+  };
+
   return (
     <div className={styles.app}>
       <a ref={skipToMainRef} className={styles.skipToMain} href="#main-content">
@@ -36,7 +40,7 @@ function App() {
         <p className="body-text">&copy; A11Y AIRLINE</p>
       </footer>
 
-      <PromotionModal closeCallback={() => skipToMainRef.current?.focus()} />
+      <PromotionModal closeCallback={moveFocusToMain} />
     </div>
   );
 }
